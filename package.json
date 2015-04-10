@@ -4,13 +4,21 @@
         "email" : "christos@muigui.com",
         "url" : "http://muigui.com"
     },
+    "contributors" : [ {
+        "name" : "Christos Constandinou",
+        "email" : "christos@muigui.com"
+    }, {
+        "name" : "Simon Jefford",
+        "email" : "si@ibrokethat.com"
+    } ],
     "description" : "useful deep/shallow copy/update",
     "devDependencies" : {
+        "babel" : "5.0.x",
         "chai" : "2.2.x",
         "mocha" : "2.2.x"
     },
     "engines" : {
-        "node" : ">= 0.11.x"
+        "node" : ">=0.11.x"
     },
     "keywords" : [ "copy", "merge", "update" ],
     "licenses" : [
@@ -26,7 +34,9 @@
         "url" : "muigui/useful-copy"
     },
     "scripts" : {
-        "test" : "mocha -c --ignore-leaks -R spec -u tdd ./test/runner.js"
+        "build" : "./node_modules/.bin/babel ./*.js --out-dir es5 --source-maps",
+        "build-watch" : "./node_modules/.bin/babel ./*.js --out-dir es5 --source-maps -w",
+        "test" : "node --harmony ./node_modules/.bin/mocha --compilers js:babel/register --colors --harmony --recursive -R spec --ui tdd ./test.js"
     },
     "version" : "0.1.0"
 }

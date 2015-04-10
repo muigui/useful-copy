@@ -1,112 +1,121 @@
-	function copy( target, source, no_overwrite ) {
-		no_overwrite = no_overwrite === true;
+"use strict";
 
-		if ( !source ) {
-			source = target;
-			target = {};
-		}
+export const is_plain_object = typeof Object.getPrototypeOf !== 'function' && typeof jQuery !== 'undefined'
+                           ? jQuery.isPlainObject
+                           : isPlainObject;
 
-		source = Object( source );
+export function copy(target, source, no_overwrite) {
+    no_overwrite = no_overwrite === true;
 
-		for ( var key in source )
-			if ( Object.prototype.hasOwnProperty.call( source, key ) && ( no_overwrite !== true || !Object.prototype.hasOwnProperty.call( target, key ) ) )
-				target[key] = source[key];
+    if (!source) {
+        source = target;
+        target = {};
+    }
 
-		return target;
-	}
+    source = Object(source);
 
-	function is_plain_object( item ) {
-		if ( item === UNDEF || item === null || typeof item !== 'object' )
-			return false;
+    for (let key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key) && (no_overwrite !== true || !Object.prototype.hasOwnProperty.call(target, key))) {
+            target[key] = source[key];
+        }
+    }
 
-		var proto = Object.getPrototypeOf( item );
+    return target;
+}
 
-		return !!( proto === null || proto.constructor === Object );
-	}
+export function merge(target, source) {
+    if (source === UNDEF) {
+        if (target === UNDEF) {
+            return target;
+        }
 
-	function merge( target, source ) {
-		if ( source === UNDEF ) {
-			if ( target === UNDEF ) // todo: test
-				return  target;
+        if (Array.isArray(target)) {
+            return target.reduce(merge_array, []);
+        }
+        else if (is_plain_object(target)) {
+            return Object.keys(target).reduce(merge_object, {
+                source : target,
+                target : {}
+            }).target;
+        }
 
-			if ( Array.isArray( target ) )
-				return  target.reduce( merge_array, [] );
+        return target;
+    }
 
-			else if ( is_plain_object( target ) )
-				return  Object.keys( target ).reduce( merge_object, {
-							source : target,
-							target : {}
-						} ).target;
+    if (Array.isArray(source)) {
+        if (!Array.isArray(target)) {
+            target = [];
+        }
+        else {
+            target.length = source.length; // remove any extra items on the merged Array
+        }
 
-			return target;
-		}
+        return source.reduce(merge_array, target);
+    }
+    else if (is_plain_object(source)) {
+        return Object.keys(source).reduce(merge_object, {
+            source : source,
+            target : Object.prototype.toString.call(target) === '[object Object]' ? target : {}
+        }).target;
+    }
 
-		if ( Array.isArray( source ) ) {
-			if ( !Array.isArray( target ) )
-				target = [];
-			else
-				target.length = source.length; // remove any extra items on the merged Array
+    return source;
+}
 
-				return source.reduce( merge_array, target );
-		}
-		else if ( is_plain_object( source ) )
-			return  Object.keys( source ).reduce( merge_object, {
-						source : source,
-						target : is_plain_object( target ) ? target : {}
-					} ).target;
+export function update(target, source) {
+    if (source === UNDEF) {
+        return merge(target);
+    }
 
-		return source;
-	}
+    if (target === UNDEF || target === null) {
+        return merge(source);
+    }
 
-	function merge_array( target, source, i ) {
-		target[i] = merge( target[i], source );
+    if (Array.isArray(source)) {
+        return source.reduce(update_array, target);
+    }
+    else if (is_plain_object(source)) {
+        if (!is_plain_object(target)) {
+            return target;
+        }
+        return Object.keys(source).reduce(update_object, {source : source, target : target}).target;
+    }
+    return target;
+}
 
-		return target;
-	}
+function isPlainObject(item) {
+    if (item === UNDEF || item === null || typeof item !== 'object') {
+        return false;
 
-	function merge_object( o, key ) {
-		o.target[key] = merge( o.target[key], o.source[key] );
+    }
 
-		return o;
-	}
+    var proto = Object.getPrototypeOf(item);
 
-	function update( target, source ) {
-		if ( source === UNDEF )
-			return merge( target );
+    return !!( proto === null || proto.constructor === Object );
+}
 
-		if ( target === UNDEF || target === null )
-			return merge( source );
+function merge_array(target, source, i) {
+    target[i] = merge(target[i], source);
 
-		if ( Array.isArray( source ) ) {
-			if ( !Array.isArray( target ) )
-				return target;
+    return target;
+}
 
-			return source.reduce( update_array, target )
-		}
-		else if ( is_plain_object( source ) ) {
-			if ( !is_plain_object( target ) )
-				return target;
+function merge_object(o, key) {
+    o.target[key] = merge(o.target[key], o.source[key]);
 
-			return Object.keys( source ).reduce( update_object, { source : source, target : target } ).target;
-		}
+    return o;
+}
 
-		return target;
-	}
+function update_array(target, source, i) {
+    target[i] = update(target[i], source);
 
-	function update_array( target, source, i ) {
-		target[i] = update( target[i], source );
+    return target;
+}
 
-		return target;
-	}
+function update_object(o, key) {
+    o.target[key] = update(o.target[key], o.source[key]);
 
-	function update_object( o, key ) {
-		o.target[key] = update( o.target[key], o.source[key] );
+    return o;
+}
 
-		return o;
-	}
-
-	var UNDEF;
-
-	module.exports = copy;
-	copy.merge     = merge;
-	copy.update    = update;
+var UNDEF;
