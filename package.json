@@ -18,6 +18,7 @@
         "mocha" : "2.2.x"
     },
     "engines" : {
+        "iojs" : ">=1.x.x",
         "node" : ">=0.11.x"
     },
     "keywords" : [ "copy", "merge", "update" ],
