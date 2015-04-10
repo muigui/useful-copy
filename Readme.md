@@ -4,13 +4,29 @@
 
 ## Installation
 
-  Install with [component(1)](http://component.io):
+```shell
 
-    $ component install muigui/useful-copy
+    >$ npm install useful-copy
 
-  Install with npm:
+```
 
-    $ npm install useful-copy
+## Test
+
+```shell
+
+    useful-copy>$ npm test
+
+```
+
+## Build
+
+if you want to convert useful-copy into es5, you can simply run:
+
+```shell
+
+    useful-copy>$ npm run build
+
+```
 
 ## API
 
